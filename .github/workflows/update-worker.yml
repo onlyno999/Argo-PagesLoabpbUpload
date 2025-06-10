@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 安装依赖工具
-        run: sudo apt-get update && sudo apt-get install -y jq zip unzip
+        run: sudo apt-get update && sudo apt-get install -y jq unzip
 
       - name: 获取当前本地版本
         id: get_local_version
@@ -67,9 +67,11 @@ jobs:
 
       - name: 如果需要，清理旧文件并下载新版本
         if: env.UPDATE_NEEDED == 'true'
+        shell: bash
         run: |
           echo -e "\033[34m[清理旧文件]\033[0m"
-          find . -mindepth 1 ! -name '.git' ! -name '.' -exec rm -rf {} +
+          shopt -s extglob
+          rm -rf !(version.txt|.git|.github)
           echo -e "\033[34m[下载最新 worker.zip]\033[0m"
           wget -O worker.zip "$DOWNLOAD_URL"
           echo -e "\033[34m[解压 worker.zip]\033[0m"
@@ -85,4 +87,3 @@ jobs:
         with:
           commit_message: "🔄 自动同步最新 Worker 版本：${{ env.TAG_NAME }}"
           commit_author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          push_options: --force
